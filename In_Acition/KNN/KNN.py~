@@ -1,0 +1,40 @@
+from numpy import *
+import operator
+
+def createDataSet():
+    group = array([[1.0, 1.1], [1.0, 1.0], [0, 0], [0, 0.1]])
+    labels = ['A', 'A', 'B', 'B']
+    return group, labels
+
+def Classify0(inX, dataset, labels, k):
+    DataSetSize = dataset.shape[0]
+    DiffMat = tile(inX, (DataSetSize,1)) - dataset
+    sqDiffMat = DiffMat**2
+    sqDistances = sqDiffMat.sum(axis=1)
+    Distances = sqDistances**0.5
+    SortedDistInd = Distances.argsort()
+    ClassCount = {}
+
+    for i in range(k):
+        voteIlabel = labels[SortedDistInd[i]]
+        ClassCount[voteIlabel] = ClassCount.get(voteIlabel, 0) + 1
+    
+    SortedClassCount = sorted(ClassCount.iteritems(), key = operator.itemgetter(1), reverse = True)
+    return SortedClassCount[0][0]
+
+def file2matrix(filename):
+    fr = open(filename)
+    ArrayOfLines = fr.readlines()
+    NumberOfLines = len(ArrayOfLines)
+    returnMat = zeros((NumberOfLines, 3))
+    ClassLabelVec = []
+    Index = 0
+
+    for line in ArrayOfLines:
+        line = line.strip()
+        listFromLines = line.split('\t')
+        returnMat[Index, :] = listFromLines[0:3]
+        ClassLabelVec.append(listFromLines[-1])
+        Index += 1
+
+    return returnMat, ClassLabelVec
