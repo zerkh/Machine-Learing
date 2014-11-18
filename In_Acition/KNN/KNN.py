@@ -1,5 +1,6 @@
 from numpy import *
 import operator
+from os import listdir
 
 def createDataSet():
     group = array([[1.0, 1.1], [1.0, 1.0], [0, 0], [0, 0.1]])
@@ -73,3 +74,42 @@ def classifyPerson():
     inArr = array([ffMiles, percentTats, iceCream])
     classifierResult = Classify0((inArr-minVals)/ranges, normMat, datingLabels, 3)
     print "You will probably like this person: ", resultList[classfierResult - 1]
+
+def img2vector(filename):
+    returnVect = zeros((1,1024))
+    fr = open(filename)
+    for i in range(32):
+        lineStr = fr.readline()
+        for j in range(32):
+            returnVect[0,i*32+j] = int(lineStr[j])
+    return returnVect
+
+def handwritingClassTest():
+    hwLabels = []
+    trainingFileList = listdir("trainingDigits")
+    m = len(trainingFileList)
+    trainingMat = zeros((m, 1024))
+
+    for i in range(m):
+        filenameStr = trainingFileList[i]
+        fileStr = filenameStr.split('.')[0]
+        classStr = int(fileStr.split('_')[0])
+        hwLabels.append(classStr)
+        trainingMat[i,:] = img2vector("trainingDigits/%s" %filenameStr)
+
+    testFileList = listdir("testDigits")
+    errorCount = 0.0
+    mTest = len(testFileList)
+    for j in range(mTest):
+        filenameStr = testFileList[j]
+        fileStr = filenameStr.split('.')[0]
+        classStr = int(fileStr.split('_')[0])
+        testVec = img2vector("testDigits/%s" %filenameStr)
+        classifierResult = Classify0(testVec, trainingMat, hwLabels, 3)
+        print "the classifier came back with: %d, the real answer is: %d" %(classifierResult, classStr)
+        
+        if(classifierResult != classStr):errorCount += 1.0
+    print "\nthe total number of errors is: %d" %errorCount
+    print "\nthe totsl error rate is: %f" %(errorCount/float(mTest))
+    
+    
